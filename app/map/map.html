@@ -1,0 +1,48 @@
+<md-toolbar layout="row" flex>
+    <h1>Radius</h1>
+</md-toolbar>
+
+<div layout="row" layout-fill>
+
+    <!-- Container #3 -->
+    <md-sidenav md-is-locked-open="true" class="md-whiteframe-z2" layout="column">
+        <md-list>
+            <md-list-item >Radius: {{circle.radius.toFixed(2)}}</md-list-item>
+            <md-list-item >Max speed: {{speed}}</md-list-item>
+            <md-list-item >Probability of fatality in a collision with a pedestrian: {{risk}}</md-list-item>
+            <md-list-item><md-switch ng-model="corner.right" aria-label="Turn direction">{{ corner.right ? 'Right' : 'Left' }}</md-switch></md-list-item>
+            <md-list-item><md-button class="md-raised" ng-click="">Reset</md-button></md-list-item>
+
+            <md-list-item><md-radio-group ng-model="selectedVehicle">
+              <md-radio-button value="Car" class="md-primary">Car</md-radio-button>
+              <md-radio-button value="Delivery Truck">Delivery Truck</md-radio-button>
+              <md-radio-button value="Bus">Bus</md-radio-button>
+              <md-radio-button value="Truck">Truck</md-radio-button>
+              <md-radio-button value="Tractor trailer">Tractor trailer</md-radio-button>
+          </md-radio-group></md-list-item>
+        </md-list>
+        <!--<md-content layout-padding>
+        <div>Radius: {{radius}}</div>
+        <div>Max speed: {{speed}}</div>
+        <div>Probability of fatality in a collision with a pedestrian: {{risk}}</div>
+    </md-content>-->
+    </md-sidenav>
+
+<!-- Container #4 -->
+    <md-content id="content" flex layout="column" class="content-wrapper">
+        <div class="map_container">
+            <ui-gmap-google-map center='map.center' zoom='map.zoom' options='map.options' events='map.events' control='map.control'>
+                <ui-gmap-circle center="circle.center" stroke="circleDisplay.stroke" fill="circleDisplay.fill" radius="circle.radius"
+                visible="circle.visible" clickable="circleDisplay.clickable">
+            </ui-gmap-circle>
+            <ui-gmap-markers models="points" coords="'self'" icon="nodeIcon" options='markerOptions' events='markerEvents'>
+            </ui-gmap-markers>
+
+            <ui-gmap-polyline path="departure.outer.coords" stroke="departure.outer.stroke" editable="true" events="departure.outer.events"></ui-gmap-polyline>
+            <ui-gmap-polyline path="receiving.outer.coords" stroke="receiving.outer.stroke" editable="true" events="receiving.outer.events"></ui-gmap-polyline>
+            <ui-gmap-polygon path="path.coords" stroke="path.stroke" fill="path.fill" editable="false" events=""></ui-gmap-polyline>
+            <!--<ui-gmap-polyline path="control.coords" stroke="" editable="true" events=""></ui-gmap-polyline>-->
+        </ui-gmap-google-map>
+    </md-content>
+
+</div>

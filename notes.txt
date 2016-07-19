@@ -1,0 +1,39 @@
+lane markers
+- once 3+ points defined for corner, auto-generate lane markings
+    (if haven't already been edited)
+- find avg angle from centre to points
+- use cross product to find most extreme points
+- from extreme angles, figure out points at least 3.35 m (3.5?) from corner
+- also calculate tangent slope on circle
+- project tangent [X] m forwards or backwards to form lines
+
+design vehicles
+- 2 options: superimpose or one at a time
+superimpose:
+- checkboxes for each vehicle
+- draw each vehicle path in a different translucent colour
+one at a time
+- radio buttons to choose design vehicle
+- disable if turn not possible?
+- warning for vehicle speed for non-selected?
+
+path spline
+- will define back of vehicle or trailer
+- 4-th degree Bezier spline
+- end points will be offset from beginning/end of lane markers
+- 2nd and 4th points will be parallel to lane markers (for smoothness)
+
+simulator
+- get steering input based on spline path (maybe some kind of interpolation will be necessary for performance)
+- ode solve to get centreline path and orientations
+- find front overhang and rear wheel locations
+
+illustrator
+- take overhang and wheel locations, turn into polygon
+
+optimizer
+- obj function: minimize path length
+- constraints:
+  o does not intersect circle (radius - closest distance)
+  o does not exceed max steering angle (limit - dmax)
+  ? does not cross lane lines? (or should this be put into objective fn somehow?)
