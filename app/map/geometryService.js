@@ -34,7 +34,7 @@ angular.module('myApp.map')
         return getBezierPoint(this.points, t);
     }
 
-/* The following code is adapted from https://github.com/Pomax/bezierjs, which is under an MIT license.
+    // The following code is adapted from https://github.com/Pomax/bezierjs, which is under an MIT license.
     // Legendre-Gauss abscissae with n=24 (x_i values, defined at i=n as the roots of the nth order Legendre polynomial Pn(x))
     var Tvalues=[
       -0.0640568928626056260850430826247450385909,
