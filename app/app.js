@@ -14,6 +14,7 @@ config(['$routeProvider', function($routeProvider) {
 .config(function(uiGmapGoogleMapApiProvider) {
     uiGmapGoogleMapApiProvider.configure({
         //    key: 'your api key',
+        key: 'AIzaSyA-btJ3-kvPpUBL6tX4eYihoBN76VG_yp4',
         v: '3.23', //defaults to latest 3.X anyhow
         libraries: 'geometry'
     });
