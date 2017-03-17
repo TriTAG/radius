@@ -30,6 +30,63 @@ function($scope, $route, $routeParams, $timeout, $mdColors, geometryService, uiG
         } else {
             $scope.points = [];
         }
+        $scope.vehicles = [
+            {
+                name: 'Car',
+                width: 2.13, //2.59,
+                wheelbase: 3.35,//7.62,
+                frontOverhang: .91,//2.13,
+                rearOverhang: 1.52,//2.44,
+                maxSteeringAngle: Math.PI/180.0 *31.2,//Math.PI* 41.0/180.0,
+                enabled: true
+            },
+            {
+                name: 'Delivery truck',
+                width: 2.59, //2.59,
+                wheelbase: 3.95,
+                frontOverhang: 0.96,
+                rearOverhang: 1.98,
+                maxSteeringAngle: Math.PI* 31.7/180.0,
+                enabled: true
+            },
+            {
+                name: 'Bus',
+                width: 2.59, //2.59,
+                wheelbase: 7.62,
+                frontOverhang: 2.13,
+                rearOverhang: 2.44,
+                maxSteeringAngle: Math.PI* 41.0/180.0,
+                enabled: true
+            },
+            {
+                name: 'Single unit truck',
+                width: 2.59,
+                wheelbase: 6.1,
+                frontOverhang: 1.22,
+                rearOverhang: 1.83,
+                maxSteeringAngle: Math.PI* 31.7/180.0,
+                enabled: true
+            },
+            {
+                name: 'Fire truck',
+                width: 2.59, //2.59,
+                wheelbase: 6.096,//7.62,
+                frontOverhang: 2.59,//2.13,
+                rearOverhang: 4.01,//2.44,
+                maxSteeringAngle: Math.PI/180.0 *40,
+                enabled: true//Math.PI* 41.0/180.0,
+            },
+            {
+                name: 'Tractor trailer',
+                width: 2.59, //2.59,
+                wheelbase: 6.096,//7.62,
+                frontOverhang: 2.59,//2.13,
+                rearOverhang: 4.01,//2.44,
+                maxSteeringAngle: Math.PI/180.0 *40,
+                enabled: false//Math.PI* 41.0/180.0,
+            }
+        ];
+        $scope.selectedVehicle = $scope.vehicles[0];
         $scope.corner = {
             right: true
         };
@@ -105,6 +162,8 @@ function($scope, $route, $routeParams, $timeout, $mdColors, geometryService, uiG
         };
         $scope.path = {
             coords: [],
+            start: [],
+            end: [],
             stroke: {
                 opacity: 0.75,
                 color: 'orange'
@@ -112,6 +171,14 @@ function($scope, $route, $routeParams, $timeout, $mdColors, geometryService, uiG
             fill: {
                 opacity: 0.5,
                 color: 'orange'
+            },
+            car_stroke: {
+                opacity: 0.75,
+                color: 'red'
+            },
+            car_fill: {
+                opacity: 0.5,
+                color: 'red'
             }
         };
         $scope.control = {coords: []};
@@ -169,23 +236,26 @@ function($scope, $route, $routeParams, $timeout, $mdColors, geometryService, uiG
                     maxSteeringAngle: Math.PI/180.0 *31.2//Math.PI* 41.0/180.0,
 
                 }*/
-                var vehicle = { // firetruck
-                    width: 2.59, //2.59,
-                    wheelbase: 6.096,//7.62,
-                    frontOverhang: 2.59,//2.13,
-                    rearOverhang: 4.01,//2.44,
-                    maxSteeringAngle: Math.PI/180.0 *40//Math.PI* 41.0/180.0,
-
-                }
+                // var vehicle = { // firetruck
+                //     width: 2.59, //2.59,
+                //     wheelbase: 6.096,//7.62,
+                //     frontOverhang: 2.59,//2.13,
+                //     rearOverhang: 4.01,//2.44,
+                //     maxSteeringAngle: Math.PI/180.0 *40//Math.PI* 41.0/180.0,
+                //
+                // }
 
                 var curve = geometryService.initCurve($scope.departure.outer.coords,
-                    $scope.receiving.outer.coords, $scope.corner.right, $scope.circle, vehicle);
+                    $scope.receiving.outer.coords, $scope.corner.right, $scope.circle, $scope.selectedVehicle);
                 $scope.path.coords = curve.sim;
+                $scope.path.start = curve.start;
+                $scope.path.end = curve.end;
                 $scope.control.coords = curve.points;
             }
         }
         $scope.$watch('departure.outer.coords', coordChange, true);
         $scope.$watch('receiving.outer.coords', coordChange, true);
+        $scope.$watch('selectedVehicle', coordChange, true);
         $scope.$watch('control.coords', function() {
             //$scope.path.coords = geometryService.bez($scope.control.coords);
         }, true);

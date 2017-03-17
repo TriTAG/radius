@@ -302,6 +302,14 @@ angular.module('myApp.map')
             var fry = sol[i][1] - front * Math.sin(sol[i][2]) - vehicle.width /2.0 * Math.cos(sol[i][2]);
             points_fr.push([frx,fry])
         }
+        var car_start = [
+            points_fl[0], points_fr[0],
+            points_rr[0], points_rl[0]
+        ];
+        var car_end = [
+            points_fl[t.length - 1], points_fr[t.length - 1],
+            points_rr[t.length - 1], points_rl[t.length - 1]
+        ];
         points_fl.reverse();
         points_fr.reverse();
         points_fl.push(points_rl[0]);
@@ -332,11 +340,14 @@ angular.module('myApp.map')
         }
         points1 = turf.buffer(points1,1e-6,'km');
         points2 = turf.buffer(points2,1e-6,'km');
-        console.log(points1);
-        console.log(points2);
+
         var poly = turf.union(points1.features[0], points2.features[0]);
-        console.log(poly);
-        return poly.geometry.coordinates[0];
+
+        return {
+            path: poly.geometry.coordinates[0],
+            start: car_start,
+            end: car_end
+        };
     }
 
     var turningRadiusTrailer = function(frontWheelbase, rearWheelbase, maxSteeringAngle, maxTrailerAngle, width) {
@@ -545,7 +556,7 @@ angular.module('myApp.map')
                 x.push(p234[0] - c[0] + (n1[0] + n2[0])*5);
                 x.push(p234[1] - c[1] + (n1[1] + n2[1])*5);
             }
-            var res = FindMinimum(calcfc, x.length,  6, x, 2, 1e-3, 0, 1000);
+            var res = FindMinimum(calcfc, x.length,  6, x, 2, 1e-3, 0, 200);
             var b = getPath(x[0], x[1], x.slice(2));
 
             var maxCurve = 0;
@@ -566,10 +577,19 @@ angular.module('myApp.map')
             console.log(Math.sqrt(0.3*127*(1/maxCurve)));
             var prof = profile(b, n1, p1, vehicle);
             var profArray = [];
-            for (var i = 0; i < prof.length; i++) {
-                profArray.push(xy2latLng(prof[i]));
+            for (var i = 0; i < prof.path.length; i++) {
+                profArray.push(xy2latLng(prof.path[i]));
             }
-            return {path: ptArray, points: ctrlArray, sim: profArray};
+            var start = [], end = [];
+            for (var i = 0; i < prof.start.length; i++) {
+                start.push(xy2latLng(prof.start[i]));
+                end.push(xy2latLng(prof.end[i]));
+            }
+            console.log(end);
+            return {
+                path: ptArray, points: ctrlArray, sim: profArray,
+                start: start, end: end
+            };
         },
         bez: function(points) {
             var nPoints = [];

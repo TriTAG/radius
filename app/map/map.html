@@ -11,15 +11,24 @@
             <md-list-item >Max speed: {{speed}}</md-list-item>
             <md-list-item >Probability of fatality in a collision with a pedestrian: {{risk}}</md-list-item>
             <md-list-item><md-switch ng-model="corner.right" aria-label="Turn direction">{{ corner.right ? 'Right' : 'Left' }}</md-switch></md-list-item>
-            <md-list-item><md-button class="md-raised" ng-click="">Reset</md-button></md-list-item>
 
-            <md-list-item><md-radio-group ng-model="selectedVehicle">
-              <md-radio-button value="Car" class="md-primary">Car</md-radio-button>
-              <md-radio-button value="Delivery Truck">Delivery Truck</md-radio-button>
-              <md-radio-button value="Bus">Bus</md-radio-button>
-              <md-radio-button value="Truck">Truck</md-radio-button>
-              <md-radio-button value="Tractor trailer">Tractor trailer</md-radio-button>
-          </md-radio-group></md-list-item>
+
+            <md-list-item>
+                Design vehicle:
+            </md-list-item>
+            <md-list-item>
+                <md-radio-group ng-model="selectedVehicle">
+                  <md-radio-button ng-repeat="vehicle in vehicles track by vehicle.name" ng-value="vehicle" ng-disabled="! vehicle.enabled">
+                      {{vehicle.name}}
+                  </md-radio-button>
+                  <!--<md-radio-button value="Car" class="md-primary">Car</md-radio-button>
+                  <md-radio-button value="Delivery Truck">Delivery Truck</md-radio-button>
+                  <md-radio-button value="Bus">Bus</md-radio-button>
+                  <md-radio-button value="Truck">Truck</md-radio-button>
+                  <md-radio-button value="Tractor trailer">Tractor trailer</md-radio-button>-->
+                </md-radio-group>
+             </md-list-item>
+             <md-list-item><md-button class="md-raised" ng-click="">Reset</md-button></md-list-item>
         </md-list>
         <!--<md-content layout-padding>
         <div>Radius: {{radius}}</div>
@@ -41,6 +50,8 @@
             <ui-gmap-polyline path="departure.outer.coords" stroke="departure.outer.stroke" editable="true" events="departure.outer.events"></ui-gmap-polyline>
             <ui-gmap-polyline path="receiving.outer.coords" stroke="receiving.outer.stroke" editable="true" events="receiving.outer.events"></ui-gmap-polyline>
             <ui-gmap-polygon path="path.coords" stroke="path.stroke" fill="path.fill" editable="false" events=""></ui-gmap-polyline>
+            <ui-gmap-polygon path="path.start" stroke="path.car_stroke" fill="path.car_fill" editable="false" events=""></ui-gmap-polyline>
+            <ui-gmap-polygon path="path.end" stroke="path.car_stroke" fill="path.car_fill" editable="false" events=""></ui-gmap-polyline>
             <!--<ui-gmap-polyline path="control.coords" stroke="" editable="true" events=""></ui-gmap-polyline>-->
         </ui-gmap-google-map>
     </md-content>
