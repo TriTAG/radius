@@ -550,16 +550,11 @@ angular.module('myApp.map')
                 CON[3] = - CON[2];
                 CON[4] = d1[1]/d1[0] - n2[1]/n2[0];
                 CON[5] = - CON[4];
-                //CON[2] = X[0] - 2;
-                //CON[3] = X[1] - 2;
-                //CON[4] = (X[2] * (n1[0]+n2[0]) + X[3]* (n1[1]+n2[1]))*50;
-                //CON[5] = (X[4] * (n1[0]+n2[0]) + X[5]* (n1[1]+n2[1]))*50;
+                CON[6] = - Math.abs(path.kLUT[0])
+                CON[7] = - Math.abs(path.kLUT[path.kLUT.length-1])
 
                 return path.len();
             }
-            //var x = [l1[0][0]-c[0], l1[0][1] - c[1]];//len1/2, len2/2] //, p234[0] - c[0] + n1[0], p234[1] - c[1] + n1[1],
-                //p234[0] - c[0], p234[1] - c[1],
-                //p234[0] - c[0] + n2[0], p234[1] - c[1] + n2[1]];//p[0] ,p[1] ];//p3[0]- c[0], p234[1]- c[1], p234[0] - c[0], p234[1] - c[1]+1];
 
             var a0 = Math.atan2(l1[1][1]-c[1], l1[1][0]-c[0]);
             var a1 = Math.atan2(l2[1][1]-c[1], l2[1][0]-c[0]);
@@ -573,12 +568,7 @@ angular.module('myApp.map')
                 x.push(circle.radius*1.5*Math.cos(angle));
                 x.push(circle.radius*1.5*Math.sin(angle));
             }
-            /*for(var i = 0; i < 5; i++) {
-                x.push(p234[0] - c[0] + (n1[0] + n2[0])*3);
-                x.push(p234[1] - c[1] + (n1[1] + n2[1])*3);
-            }
-            x.push(l2[0][0]-c[0], l2[0][1]-c[1]);*/
-            var res = FindMinimum(calcfc, x.length,  6, x, 2, 1e-3, 0, 200);
+            var res = FindMinimum(calcfc, x.length,  8, x, 2, 1e-3, 0, 200);
             var b = getPath(x);
 
             var maxCurve = 0;
