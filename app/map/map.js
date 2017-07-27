@@ -75,9 +75,9 @@ function($scope, $route, $routeParams, $timeout, $mdColors, geometryService, uiG
             {
                 name: 'Bus',
                 width: 2.59, //2.59,
-                wheelbase: 7.62,
-                frontOverhang: 2.13,
-                rearOverhang: 2.44,
+                wheelbase: 7.2,
+                frontOverhang: 2.19,
+                rearOverhang: 3,
                 maxSteeringAngle: Math.PI* 41.0/180.0,
                 enabled: true
             },
