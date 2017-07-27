@@ -107,6 +107,31 @@ angular.module('myApp.map')
         return z * sum;
     }
 
+    var SplineRoot = function(spline) {
+        this.spline = spline;
+        this.compute = function(t) {
+            return this.spline.at(t);
+        };
+        this.derivativeCurve = function() {
+            return new SplineRoot(this.spline.diff());
+        };
+        this.len = len;
+        this.LUT = [];
+        var t = numeric.linspace(0,1,200);
+        for(var i = 0; i < t.length; i++) {
+            this.LUT.push(this.spline.at(t[i]));
+        };
+        console.log(this);
+    };
+
+    var CubicSpline = function(points) {
+        this.points = points;
+        var t = numeric.linspace(0,1,points.length);
+        var spline = numeric.spline(t, points);
+        //console.log(spline);
+        SplineRoot.call(this, spline);
+    }
+
     var Bezier = function(points) {
         this.points = points;
         this.compute = compute;
@@ -156,16 +181,16 @@ angular.module('myApp.map')
         return minT;
     }
 
-    var VehiclePath = function(start, end, departureDir, receivingDir, d1, d2, midControls) {
-        var p2x = start[0] + d1 * departureDir[0];
+    var VehiclePath = function(start, end, midControls) {
+        /*var p2x = start[0] + d1 * departureDir[0];
         var p2y = start[1] + d1 * departureDir[1];
         var p4x = end[0] + d2 * receivingDir[0];
-        var p4y = end[1] + d2 * receivingDir[1];
-        var coords = [start, [p2x, p2y]];
+        var p4y = end[1] + d2 * receivingDir[1];*/
+        var coords = [start];
         for(var i = 0; i < midControls.length; i+=2) {
             coords.push([midControls[i], midControls[i+1]]);
         }
-        coords.push([p4x,p4y], end);
+        coords.push(end);
         Bezier.call(this, coords);
         var dPath = this.derivativeCurve();
         var ddPath = dPath.derivativeCurve();
@@ -223,7 +248,9 @@ angular.module('myApp.map')
     };
 
     var constructLaneLine = function(center, vector, offset, length, direction) {
-        var p1 = [center[0] + offset * vector[0], center[1] + offset * vector[1]];
+        // var p1 = [center[0] + offset * vector[0], center[1] + offset * vector[1]];
+        // var p2 = [p1[0] - length*vector[1]*direction, p1[1] + length*vector[0]*direction];
+        var p1 = [center[0] + offset * vector[0] - length*vector[1]*direction, center[1] + offset * vector[1] + length*vector[0]*direction];
         var p2 = [p1[0] - length*vector[1]*direction, p1[1] + length*vector[0]*direction];
         p1 = xy2latLng(p1);
         p2 = xy2latLng(p2);
@@ -498,30 +525,23 @@ angular.module('myApp.map')
                       l1[1][1] - dir * n1[0] * distance - n1[1] *0];
             var p5 = [l2[1][0] - dir * n2[1] * distance - n2[0] *0,
                       l2[1][1] + dir * n2[0] * distance - n2[1] *0];
-            var p = [5*circle.radius * (n1[0]+n2[0]), 5*circle.radius * (n1[1]+n2[1])];
-            var parms = numeric.solve([[n1[0],-n2[0]],[n1[1],-n2[1]]],[p5[0]-p1[0],p5[1]-p1[1]])
-            var p234 = [p1[0] + n1[0]*parms[0],
-                        p1[1] + n1[1]*parms[0]];
-            var p3 = [p234[0] - 15 * (n1[0] + n2[0]), p234[1] - 15 * (n1[1]+n2[1])];
-            var controlPts = [p1, p234, p3, p234, p5];
+
             var ptArray = [];
             var c = latLng2xy(circle.center);
-            //var d1 = Math.sqrt((p234[0]-p1[0])*(p234[0]-p1[0]) + (p234[1]-p1[1])*(p234[1]-p1[1]));
-            //var d2 = Math.sqrt((p234[0]-p5[0])*(p234[0]-p5[0]) + (p234[1]-p5[1])*(p234[1]-p5[1]));
-            //var b = new Bezier(controlPts);
-            //var b = new VehiclePath(p1, p5, [n1[0], n1[1]], [n2[0], n2[1]], len1, len2, p3);
-            function getPath(dist1, dist2, coords) {
+
+            function getPath(coords) {
+                console.log(coords);
                 var coords2 = coords.slice();
                 for (var i = 0; i < coords2.length; i+=2) {
                     coords2[i] += c[0];
                     coords2[i+1] += c[1];
                 }
-                return new VehiclePath(p1, p5, [n1[0], n1[1]], [n2[0], n2[1]], dist1, dist2, coords2);
+                return new VehiclePath(p1, p5, coords2);
             }
             function calcfc (N,M,X,CON) {
-                var Y = X.slice(2)
+                //var Y = X.slice(2)
 
-                var path = getPath(X[0], X[1], Y);
+                var path = getPath(X);
                 //console.log(path.points);
                 var minDist = 1e9;
                 for (var i = 0; i < path.LUT.length; i++) {
@@ -542,22 +562,34 @@ angular.module('myApp.map')
                 }
                 //CON[1] = 1.0/maxCurve - 10;
                 CON[1] = vehicle.maxSteeringAngle - Math.abs(Math.atan(vehicle.wheelbase * maxCurve));
-                CON[2] = X[0] - 2;
-                CON[3] = X[1] - 2;
-                CON[4] = (X[2] * (n1[0]+n2[0]) + X[3]* (n1[1]+n2[1]))*50;
-                CON[5] = (X[4] * (n1[0]+n2[0]) + X[5]* (n1[1]+n2[1]))*50;
+                var der = path.derivativeCurve();
+                var d0 = der.compute(0);
+                var d1 = der.compute(1.0);
+                CON[2] = d0[1]/d0[0] - n1[1]/n1[0];
+                CON[3] = - CON[2];
+                CON[4] = d1[1]/d1[0] - n2[1]/n2[0];
+                CON[5] = - CON[4];
+                CON[6] = - Math.abs(path.kLUT[0])
+                CON[7] = - Math.abs(path.kLUT[path.kLUT.length-1])
 
                 return path.len();
             }
-            var x = [len1/2, len2/2] //, p234[0] - c[0] + n1[0], p234[1] - c[1] + n1[1],
-                //p234[0] - c[0], p234[1] - c[1],
-                //p234[0] - c[0] + n2[0], p234[1] - c[1] + n2[1]];//p[0] ,p[1] ];//p3[0]- c[0], p234[1]- c[1], p234[0] - c[0], p234[1] - c[1]+1];
-            for(var i = 0; i < 3; i++) {
-                x.push(p234[0] - c[0] + (n1[0] + n2[0])*5);
-                x.push(p234[1] - c[1] + (n1[1] + n2[1])*5);
+
+            var a0 = Math.atan2(l1[0][1]-c[1], l1[0][0]-c[0]);
+            var a1 = Math.atan2(l2[0][1]-c[1], l2[0][0]-c[0]);
+            if((a0-a1)*dir < 0) {
+                a1 -= dir*2.0 * Math.PI
             }
-            var res = FindMinimum(calcfc, x.length,  6, x, 2, 1e-3, 0, 200);
-            var b = getPath(x[0], x[1], x.slice(2));
+            var x = [l1[0][0]-c[0], l1[0][1]-c[1]];
+            var NUM_PTS=5;
+            for (var i = 1; i < NUM_PTS+1; i++) {
+                var angle = a0 + (i/(NUM_PTS+1)) * (a1-a0)
+                x.push((circle.radius+3)*Math.cos(angle));
+                x.push((circle.radius+3)*Math.sin(angle));
+            }
+            x.push(l2[0][0]-c[0], l2[0][1]-c[1]);
+            var res = FindMinimum(calcfc, x.length,  8, x, 2, 1e-3, 0, 200);
+            var b = getPath(x);
 
             var maxCurve = 0;
             for (var i = 0; i < b.LUT.length; i++) {
