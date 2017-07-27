@@ -1,5 +1,12 @@
 <md-toolbar layout="row" flex>
     <h1>Radius</h1>
+    <span flex></span>
+    <md-button
+        class="md-icon-button"
+        aria-label="TriTAG"
+        ng-click="">
+        <md-icon md-class="md-48" md-svg-icon="img/icons/tritag-logo.svg"></md-icon>
+    </md-button>
 </md-toolbar>
 
 <div layout="row" layout-fill>
@@ -28,7 +35,9 @@
                   <md-radio-button value="Tractor trailer">Tractor trailer</md-radio-button>-->
                 </md-radio-group>
              </md-list-item>
-             <md-list-item><md-button class="md-raised" ng-click="">Reset</md-button></md-list-item>
+             <md-list-item>
+                 <md-button class="md-raised" ng-click="resetPts()">Reset</md-button>
+             </md-list-item>
         </md-list>
         <!--<md-content layout-padding>
         <div>Radius: {{radius}}</div>
@@ -49,10 +58,10 @@
 
             <ui-gmap-polyline path="departure.outer.coords" stroke="departure.outer.stroke" editable="true" events="departure.outer.events"></ui-gmap-polyline>
             <ui-gmap-polyline path="receiving.outer.coords" stroke="receiving.outer.stroke" editable="true" events="receiving.outer.events"></ui-gmap-polyline>
-            <ui-gmap-polygon path="path.coords" stroke="path.stroke" fill="path.fill" editable="false" events=""></ui-gmap-polyline>
-            <ui-gmap-polygon path="path.start" stroke="path.car_stroke" fill="path.car_fill" editable="false" events=""></ui-gmap-polyline>
-            <ui-gmap-polygon path="path.end" stroke="path.car_stroke" fill="path.car_fill" editable="false" events=""></ui-gmap-polyline>
-            <!--<ui-gmap-polyline path="control.coords" stroke="" editable="true" events=""></ui-gmap-polyline>-->
+            <ui-gmap-polygon path="path.coords" stroke="path.stroke" fill="path.fill" editable="false" events=""></ui-gmap-polygon>
+            <ui-gmap-polygon path="path.start.pts" stroke="path.car_stroke" fill="path.car_fill" editable="false" draggable="true" events="path.start.events"></ui-gmap-polygon>
+            <ui-gmap-polygon path="path.end.pts" stroke="path.car_stroke" fill="path.car_fill" editable="false" draggable="true" events="path.end.events"></ui-gmap-polygon>
+            <ui-gmap-polyline path="control.coords" stroke="" editable="false" events=""></ui-gmap-polyline>
         </ui-gmap-google-map>
     </md-content>
 

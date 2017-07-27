@@ -16,7 +16,30 @@ angular.module('myApp.map', ['ngRoute', 'ngMaterial'])
 }])
 .controller('cornerCtrl', ['$scope', '$route', '$routeParams', '$timeout', '$mdColors', 'geometryService', 'uiGmapGoogleMapApi',
 function($scope, $route, $routeParams, $timeout, $mdColors, geometryService, uiGmapGoogleMapApi) {
+    $scope.map = {
+        center: { latitude: 43.4536148, longitude: -80.4820387 },
+        zoom: 20,
+        options: {
+            mapTypeId: "satellite",
+            streetViewControl: false,
+            mapTypeControl: false,
+            draggableCursor: 'default'
+        },
+        control: {},
+        events: {
+            click: function (mapModel, eventName, originalEventArgs) {
+                var e = originalEventArgs[0];
+                var latLng = {
+                    latitude: e.latLng.lat(),
+                    longitude: e.latLng.lng(),
+                    id: generateID()
+                };
+                $scope.points.push(latLng);
 
+                $scope.$apply();
+            }
+        }
+    };
     uiGmapGoogleMapApi.then(function(maps) {
         if ($routeParams.points) {
             $scope.points = google.maps.geometry.encoding.decodePath($routeParams.points)
@@ -109,31 +132,13 @@ function($scope, $route, $routeParams, $timeout, $mdColors, geometryService, uiG
             clickable: false
         };
         $scope.road = 0;
-        $scope.map = {
-            center: { latitude: 43.4536148, longitude: -80.4820387 },
-            zoom: 20,
-            options: {
-                mapTypeId: google.maps.MapTypeId.SATELLITE,
-                streetViewControl: false,
-                mapTypeControl: false,
-                draggableCursor: 'default'
-            },
-            control: {},
-            events: {
-                click: function (mapModel, eventName, originalEventArgs) {
-                    var e = originalEventArgs[0];
-                    var latLng = {
-                        latitude: e.latLng.lat(),
-                        longitude: e.latLng.lng(),
-                        id: generateID()
-                    };
-                    $scope.points.push(latLng);
 
-                    $scope.$apply();
-                }
-            }
-        };
-
+        $scope.resetPts = function() {
+            $scope.points = [];
+            $scope.path.coords = [];
+            $scope.path.start.pts = [];
+            $scope.path.end.pts = [];
+        }
 
         $scope.markerOptions = {
             draggable: true,
@@ -160,10 +165,41 @@ function($scope, $route, $routeParams, $timeout, $mdColors, geometryService, uiG
         $scope.receiving = {
             outer: new OuterLine('blue')
         };
+        var initDragPt;
         $scope.path = {
             coords: [],
-            start: [],
-            end: [],
+            start: {
+                pts: [],
+                events: {
+                    dragstart: function(mapModel, eventName, model, args) {
+                        initDragPt = args[0].latLng;
+                    },
+                    dragend: function (mapModel, eventName, model, args) {
+                        var newDragPt = args[0].latLng;
+                        for(var i = 0; i < 2; i++) {
+                            $scope.departure.outer.coords[i].latitude += newDragPt.lat() - initDragPt.lat();
+                            $scope.departure.outer.coords[i].longitude += newDragPt.lng() - initDragPt.lng();
+                        }
+                        coordChange();
+                    }
+                }
+            },
+            end: {
+                pts: [],
+                events: {
+                    dragstart: function(mapModel, eventName, model, args) {
+                        initDragPt = args[0].latLng;
+                    },
+                    dragend: function (mapModel, eventName, model, args) {
+                        var newDragPt = args[0].latLng;
+                        for(var i = 0; i < 2; i++) {
+                            $scope.receiving.outer.coords[i].latitude += newDragPt.lat() - initDragPt.lat();
+                            $scope.receiving.outer.coords[i].longitude += newDragPt.lng() - initDragPt.lng();
+                        }
+                        coordChange();
+                    }
+                }
+            },
             stroke: {
                 opacity: 0.75,
                 color: 'orange'
@@ -188,7 +224,7 @@ function($scope, $route, $routeParams, $timeout, $mdColors, geometryService, uiG
             'points',
             function(nv, ov) {
                 $scope.circle = geometryService.circleFromPoints($scope.points);
-                var coords = geometryService.makeOuterLaneLines($scope.points, $scope.circle, 3.5, 20);
+                var coords = geometryService.makeOuterLaneLines($scope.points, $scope.circle, 3.5, 10);
 
                 if (coords.length > 0) {
                     if ($scope.corner.right) {
@@ -248,8 +284,8 @@ function($scope, $route, $routeParams, $timeout, $mdColors, geometryService, uiG
                 var curve = geometryService.initCurve($scope.departure.outer.coords,
                     $scope.receiving.outer.coords, $scope.corner.right, $scope.circle, $scope.selectedVehicle);
                 $scope.path.coords = curve.sim;
-                $scope.path.start = curve.start;
-                $scope.path.end = curve.end;
+                $scope.path.start.pts = curve.start;
+                $scope.path.end.pts = curve.end;
                 $scope.control.coords = curve.points;
             }
         }
@@ -289,8 +325,11 @@ function OuterLine(color) {
             if (typeof args[0].vertex === 'undefined') {
                 polyline.setEditable(false);
                 polyline.setEditable(true);
+            } else if (args[0].vertex == 1) {
+                polyline.setEditable(false);
+                polyline.setEditable(true);
             }
-        },
+        }.bind(this),
         mouseup: function(polyline, eventName, model, args) {
             if (typeof args[0].vertex != 'undefined') {
                 this.edited = true;

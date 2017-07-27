@@ -16,5 +16,8 @@
     "angular-material": "~1.1.0",
     "numericjs": "~1.2.6",
     "turfjs": ""
+  },
+  "resolutions": {
+    "angular": "^1.2"
   }
 }
