@@ -107,6 +107,31 @@ angular.module('myApp.map')
         return z * sum;
     }
 
+    var SplineRoot = function(spline) {
+        this.spline = spline;
+        this.compute = function(t) {
+            return this.spline.at(t);
+        };
+        this.derivativeCurve = function() {
+            return new SplineRoot(this.spline.diff());
+        };
+        this.len = len;
+        this.LUT = [];
+        var t = numeric.linspace(0,1,200);
+        for(var i = 0; i < t.length; i++) {
+            this.LUT.push(this.spline.at(t[i]));
+        };
+        console.log(this);
+    };
+
+    var CubicSpline = function(points) {
+        this.points = points;
+        var t = numeric.linspace(0,1,points.length);
+        var spline = numeric.spline(t, points);
+        //console.log(spline);
+        SplineRoot.call(this, spline);
+    }
+
     var Bezier = function(points) {
         this.points = points;
         this.compute = compute;
@@ -223,7 +248,9 @@ angular.module('myApp.map')
     };
 
     var constructLaneLine = function(center, vector, offset, length, direction) {
-        var p1 = [center[0] + offset * vector[0], center[1] + offset * vector[1]];
+        // var p1 = [center[0] + offset * vector[0], center[1] + offset * vector[1]];
+        // var p2 = [p1[0] - length*vector[1]*direction, p1[1] + length*vector[0]*direction];
+        var p1 = [center[0] + offset * vector[0] - length*vector[1]*direction, center[1] + offset * vector[1] + length*vector[0]*direction];
         var p2 = [p1[0] - length*vector[1]*direction, p1[1] + length*vector[0]*direction];
         p1 = xy2latLng(p1);
         p2 = xy2latLng(p2);
@@ -498,18 +525,10 @@ angular.module('myApp.map')
                       l1[1][1] - dir * n1[0] * distance - n1[1] *0];
             var p5 = [l2[1][0] - dir * n2[1] * distance - n2[0] *0,
                       l2[1][1] + dir * n2[0] * distance - n2[1] *0];
-            var p = [5*circle.radius * (n1[0]+n2[0]), 5*circle.radius * (n1[1]+n2[1])];
-            var parms = numeric.solve([[n1[0],-n2[0]],[n1[1],-n2[1]]],[p5[0]-p1[0],p5[1]-p1[1]])
-            var p234 = [p1[0] + n1[0]*parms[0],
-                        p1[1] + n1[1]*parms[0]];
-            var p3 = [p234[0] - 15 * (n1[0] + n2[0]), p234[1] - 15 * (n1[1]+n2[1])];
-            var controlPts = [p1, p234, p3, p234, p5];
+
             var ptArray = [];
             var c = latLng2xy(circle.center);
-            //var d1 = Math.sqrt((p234[0]-p1[0])*(p234[0]-p1[0]) + (p234[1]-p1[1])*(p234[1]-p1[1]));
-            //var d2 = Math.sqrt((p234[0]-p5[0])*(p234[0]-p5[0]) + (p234[1]-p5[1])*(p234[1]-p5[1]));
-            //var b = new Bezier(controlPts);
-            //var b = new VehiclePath(p1, p5, [n1[0], n1[1]], [n2[0], n2[1]], len1, len2, p3);
+
             function getPath(coords) {
                 console.log(coords);
                 var coords2 = coords.slice();
@@ -556,18 +575,19 @@ angular.module('myApp.map')
                 return path.len();
             }
 
-            var a0 = Math.atan2(l1[1][1]-c[1], l1[1][0]-c[0]);
-            var a1 = Math.atan2(l2[1][1]-c[1], l2[1][0]-c[0]);
+            var a0 = Math.atan2(l1[0][1]-c[1], l1[0][0]-c[0]);
+            var a1 = Math.atan2(l2[0][1]-c[1], l2[0][0]-c[0]);
             if((a0-a1)*dir < 0) {
-                a1 -= dir * 2.0 * Math.PI
+                a1 -= dir*2.0 * Math.PI
             }
-            var x = [];
-            var NUM_PTS=10;
+            var x = [l1[0][0]-c[0], l1[0][1]-c[1]];
+            var NUM_PTS=5;
             for (var i = 1; i < NUM_PTS+1; i++) {
-                var angle = a0 + dir * (i/(NUM_PTS+1)) * (a1-a0)
-                x.push(circle.radius*1.5*Math.cos(angle));
-                x.push(circle.radius*1.5*Math.sin(angle));
+                var angle = a0 + (i/(NUM_PTS+1)) * (a1-a0)
+                x.push((circle.radius+3)*Math.cos(angle));
+                x.push((circle.radius+3)*Math.sin(angle));
             }
+            x.push(l2[0][0]-c[0], l2[0][1]-c[1]);
             var res = FindMinimum(calcfc, x.length,  8, x, 2, 1e-3, 0, 200);
             var b = getPath(x);
 
