@@ -56,11 +56,11 @@
             <ui-gmap-markers models="points" coords="'self'" icon="nodeIcon" options='markerOptions' events='markerEvents'>
             </ui-gmap-markers>
 
-            <ui-gmap-polyline path="departure.outer.coords" stroke="departure.outer.stroke" editable="true" events="departure.outer.events"></ui-gmap-polyline>
-            <ui-gmap-polyline path="receiving.outer.coords" stroke="receiving.outer.stroke" editable="true" events="receiving.outer.events"></ui-gmap-polyline>
-            <ui-gmap-polygon path="path.coords" stroke="path.stroke" fill="path.fill" editable="false" events=""></ui-gmap-polygon>
-            <ui-gmap-polygon path="path.start.pts" stroke="path.car_stroke" fill="path.car_fill" editable="false" draggable="true" events="path.start.events"></ui-gmap-polygon>
-            <ui-gmap-polygon path="path.end.pts" stroke="path.car_stroke" fill="path.car_fill" editable="false" draggable="true" events="path.end.events"></ui-gmap-polygon>
+            <ui-gmap-polyline path="departure.outer.coords" stroke="departure.outer.stroke" editable="true" events="departure.outer.events" zindex="3"></ui-gmap-polyline>
+            <ui-gmap-polyline path="receiving.outer.coords" stroke="receiving.outer.stroke" editable="true" events="receiving.outer.events" zindex="3"></ui-gmap-polyline>
+            <ui-gmap-polygon path="path.coords" stroke="path.stroke" fill="path.fill" editable="false" events="" zindex="0"></ui-gmap-polygon>
+            <ui-gmap-polygon path="path.start.pts" stroke="path.car_stroke" fill="path.car_fill" editable="false" draggable="true" events="path.start.events" zindex="5"></ui-gmap-polygon>
+            <ui-gmap-polygon path="path.end.pts" stroke="path.car_stroke" fill="path.car_fill" editable="false" draggable="true" events="path.end.events" zindex="5"></ui-gmap-polygon>
             
         </ui-gmap-google-map>
     </md-content>
