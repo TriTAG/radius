@@ -1,0 +1,19 @@
+{
+  "name": "turfjs",
+  "version": "1.4.0",
+  "main": [
+    "turf.min.js"
+  ],
+  "keywords": [
+    "gis",
+    "geospatial",
+    "javascript"
+  ],
+  "ignore": [
+    "npm-debug.log"
+  ],
+  "authors": [
+    "Turpin <eric.turpin@delair-tech.com>"
+  ],
+  "license": "MIT"
+}

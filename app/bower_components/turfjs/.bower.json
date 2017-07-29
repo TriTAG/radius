@@ -1,0 +1,28 @@
+{
+  "name": "turfjs",
+  "main": [
+    "turf.min.js"
+  ],
+  "keywords": [
+    "gis",
+    "geospatial",
+    "javascript"
+  ],
+  "ignore": [
+    "npm-debug.log"
+  ],
+  "authors": [
+    "Turpin <eric.turpin@delair-tech.com>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/ericturpin/turfjs",
+  "_release": "f4a434ecb9",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "f4a434ecb97fa34e476ea9d4c0691fbba6271988"
+  },
+  "_source": "https://github.com/ericturpin/turfjs.git",
+  "_target": "*",
+  "_originalSource": "turfjs"
+}
