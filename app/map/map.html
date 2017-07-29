@@ -16,7 +16,7 @@
         <md-list>
             <md-list-item >Radius: {{circle.radius.toFixed(2)}}</md-list-item>
             <md-list-item >Max speed: {{speed}}</md-list-item>
-            <md-list-item >Probability of fatality in a collision with a pedestrian: {{risk}}</md-list-item>
+            <md-list-item >Probability of fatality in a collision with a pedestrian [Tefft, 2011]: {{risk}}</md-list-item>
             <md-list-item><md-switch ng-model="corner.right" aria-label="Turn direction">{{ corner.right ? 'Right' : 'Left' }}</md-switch></md-list-item>
 
 
@@ -61,7 +61,6 @@
             <ui-gmap-polygon path="path.coords" stroke="path.stroke" fill="path.fill" editable="false" events="" zindex="0"></ui-gmap-polygon>
             <ui-gmap-polygon path="path.start.pts" stroke="path.car_stroke" fill="path.car_fill" editable="false" draggable="true" events="path.start.events" zindex="5"></ui-gmap-polygon>
             <ui-gmap-polygon path="path.end.pts" stroke="path.car_stroke" fill="path.car_fill" editable="false" draggable="true" events="path.end.events" zindex="5"></ui-gmap-polygon>
-            
         </ui-gmap-google-map>
     </md-content>
 

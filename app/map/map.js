@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('myApp.map', ['ngRoute', 'ngMaterial'])
+var app = angular.module('myApp.map', ['ngRoute', 'ngMaterial'])
 
 .config(['$routeProvider', '$mdThemingProvider', '$mdIconProvider', function($routeProvider,$mdThemingProvider, $mdIconProvider) {
     $routeProvider.when('/map/:points?', {
@@ -242,7 +242,7 @@ function($scope, $route, $routeParams, $timeout, $mdColors, geometryService, uiG
                             $scope.receiving.outer.coords = coords[0];
                         }
                     }
-
+                    coordChange();
                 } else {
                     $scope.departure.outer.coords = [];
                     $scope.departure.outer.edited = false;
@@ -251,7 +251,10 @@ function($scope, $route, $routeParams, $timeout, $mdColors, geometryService, uiG
                 }
                 var speed = Math.sqrt(0.4*127*($scope.circle.radius+1.5));
                 $scope.speed = speed.toFixed(0) + ' km/h';
-                $scope.risk = (100.0/(1.0 + Math.exp(6.9 - 0.090*speed))).toFixed(1) + ' %';
+                // Rosen et al
+                // $scope.risk = (100.0/(1.0 + Math.exp(6.9 - 0.090*speed))).toFixed(1) + ' %';
+                // Tefft
+                $scope.risk = (100.0/(1.0 + Math.exp(5.19 - 0.079*speed))).toFixed(1) + ' %';
             }, true
         );
         $scope.$watch(
@@ -292,9 +295,9 @@ function($scope, $route, $routeParams, $timeout, $mdColors, geometryService, uiG
         $scope.$watch('departure.outer.coords', coordChange, true);
         $scope.$watch('receiving.outer.coords', coordChange, true);
         $scope.$watch('selectedVehicle', coordChange, true);
-        $scope.$watch('control.coords', function() {
+        //$scope.$watch('control.coords', function() {
             //$scope.path.coords = geometryService.bez($scope.control.coords);
-        }, true);
+        //}, true);
     });
 }]);
 
@@ -336,4 +339,4 @@ function OuterLine(color) {
             }
         }.bind(this)
     }
-}
+};

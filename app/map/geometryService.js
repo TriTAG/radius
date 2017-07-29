@@ -276,37 +276,20 @@ angular.module('myApp.map')
         return points;//circleCompute(points).radius - (width/2.0);
     };
 
-    function profile(curve, n1, start, vehicle) {
+    function profile(curve, vehicle) {
         var V = curve.len();//curve.len();
         var derCurve = curve.derivativeCurve();
-        function odeEq(t,x) {
-            var s = curve.nearestT(x.slice(0,2));
-            var point = curve.compute(s)
-            var tangent = derCurve.compute(s)
-            var error = [point[0] - x[0], point[1]- x[1]];
-            var dir = Math.sign(error[0]*tangent[1] - error[1]*tangent[0]);
-            var derr = Math.atan2(tangent[1], tangent[0]) - x[2];
-
-            var d = -Math.atan(curve.computeK(s)*vehicle.wheelbase);
-
-            d -= derr * 1e-6;
-            d += dir * Math.sqrt(calcDistance2(error, [0,0])) * 1e-1;
-            return [
-                V*Math.cos(x[2]),
-                -V*Math.sin(x[2]),
-                V/vehicle.wheelbase*Math.tan(d)
-            ]
+        var sol = [];
+        var t = numeric.linspace(0,1,curve.LUT.length);
+        for (var i = 0; i < curve.LUT.length; i++) {
+            var angle = Math.atan2(-derCurve.LUT[i][1], derCurve.LUT[i][0]);
+            sol.push([curve.LUT[i][0], curve.LUT[i][1], angle]);
         }
-        var sol = numeric.dopri(0,1,[start[0], start[1], Math.atan2(-n1[1], n1[0])],odeEq, 1e-6, 1000,
-            function(t,x) {
-                return curve.nearestT(x.slice(0,2)) -0.999;
-            }
-        );
-        console.log(sol);
-        var t = numeric.linspace(0,sol.x[sol.x.length-1],curve.LUT.length);
-        var sol = sol.at(t);
-        //console.log(sol);
-        //console.log(vehicle);
+        // When computing trailer profile,
+        // theta_1' = y''/x' - y'*x''/x'**2)/(1 + y'**2/x'**2)
+        // theta_1' = v/d_1*sin(theta_0-theta_1)
+        // v = sqrt(x'**2+y'**2)
+
         var points_rl = [];
         var points_rr = [];
         var points_fl = [];
@@ -530,7 +513,7 @@ angular.module('myApp.map')
             var c = latLng2xy(circle.center);
 
             function getPath(coords) {
-                console.log(coords);
+                //console.log(coords);
                 var coords2 = coords.slice();
                 for (var i = 0; i < coords2.length; i+=2) {
                     coords2[i] += c[0];
@@ -566,6 +549,7 @@ angular.module('myApp.map')
                 var d0 = der.compute(0);
                 var d1 = der.compute(1.0);
                 CON[2] = d0[1]/d0[0] - n1[1]/n1[0];
+
                 CON[3] = - CON[2];
                 CON[4] = d1[1]/d1[0] - n2[1]/n2[0];
                 CON[5] = - CON[4];
@@ -588,7 +572,7 @@ angular.module('myApp.map')
                 x.push((circle.radius+3)*Math.sin(angle));
             }
             x.push(l2[0][0]-c[0], l2[0][1]-c[1]);
-            var res = FindMinimum(calcfc, x.length,  8, x, 2, 1e-3, 0, 200);
+            var res = FindMinimum(calcfc, x.length,  8, x, 2, 1e-4, 4, 300);
             var b = getPath(x);
 
             var maxCurve = 0;
@@ -607,7 +591,7 @@ angular.module('myApp.map')
             }
 
             console.log(Math.sqrt(0.3*127*(1/maxCurve)));
-            var prof = profile(b, n1, p1, vehicle);
+            var prof = profile(b, vehicle);
             var profArray = [];
             for (var i = 0; i < prof.path.length; i++) {
                 profArray.push(xy2latLng(prof.path[i]));
